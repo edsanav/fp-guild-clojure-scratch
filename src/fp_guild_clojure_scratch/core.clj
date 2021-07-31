@@ -2,21 +2,16 @@
 
 (def raw-input (slurp "src/fp_guild_clojure_scratch/input.txt"))
 
-(defn fvals [m f]
+(defn map-vals [f m]
   (into {} (for [[k v] m] [k (f v)])))
-
-
-(defn by-base [ltt]
-  (vector (first ltt), (count (nth ltt 1)))
-  )
-
 
 
 (defn GCContent? [sequenceNT]
   (let [
-        groupedNT (into {} (map by-base (group-by identity sequenceNT)))
-        GC (+ (groupedNT \G) (groupedNT \C))
-        total (apply + (vals groupedNT))
+        groupedNT (group-by identity sequenceNT)
+        NTcount (into {} (for [[k,v] groupedNT] [k (count v)]))
+        GC (+ (NTcount \G 0) (NTcount \C 0))
+        total (apply + (vals NTcount))
         ]
     (* (double (/ GC total)) 100)
     )
@@ -24,15 +19,15 @@
 
 
 (defn sequences-GC [in]
-  (let [raw-sequences (->> in
-                           (#(clojure.string/split % #">"))
+  (let [parsed-sequences (->> in
+                           ((fn [x] (clojure.string/split x #">")))
                            (remove clojure.string/blank?)
-                           (map #(clojure.string/split % #"\n" 2))
+                           (map (fn [x](clojure.string/split x #"\n" 2)))
                            (into {})
+                           (map-vals (fn [x] (clojure.string/replace x "\n" "")))
                            )
-        final-sequences (fvals raw-sequences (fn [x] (clojure.string/replace x "\n" "")))
         ]
-    (fvals final-sequences GCContent?)
+    (map-vals GCContent? parsed-sequences)
     )
   )
 
