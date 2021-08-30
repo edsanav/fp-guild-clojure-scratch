@@ -17,17 +17,19 @@
     )
   )
 
+(defn parse-sequences [in]
+  (->> in
+       ((fn [x] (clojure.string/split x #">")))
+       (remove clojure.string/blank?)
+       (map (fn [x](clojure.string/split x #"\n" 2)))
+       (into {})
+       (map-vals (fn [x] (clojure.string/replace x "\n" "")))
+       )
+  )
+
 
 (defn sequences-GC [in]
-  (let [parsed-sequences (->> in
-                           ((fn [x] (clojure.string/split x #">")))
-                           (remove clojure.string/blank?)
-                           (map (fn [x](clojure.string/split x #"\n" 2)))
-                           (into {})
-                           (map-vals (fn [x] (clojure.string/replace x "\n" "")))
-                           )
-        ]
-    (map-vals GCContent? parsed-sequences)
+    (map-vals GCContent? (parse-sequences in)
     )
   )
 
